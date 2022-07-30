@@ -7,20 +7,23 @@ local action_state = require("telescope.actions.state")
 local M = {}
 
 M.gitspector = function ()
+    local git_branches = vim.fn.systemlist("git branch -a")
     pickers.new({}, {
         prompt_title = "branches",
         finder = finders.new_table({
-            results = { "red", "green", "blue" }
+            results = git_branches
         }),
         sorter = conf.generic_sorter({}),
-        attatch_mappings = function(prompt_bufnr, map)
-            actions.select_default:repalce(function()
-                actions.close(prompt_bufnr)
-                local selection = action_state.get_selected_entry()
-                vim.api.nvim_put({ selection[1] }, "", false, true)
-            end)
-            return true
-        end
+        attach_mappings = function(prompt_bufnr, map)
+          actions.select_default:replace(function()
+            actions.close(prompt_bufnr)
+            local selected_entry = action_state.get_selected_entry()
+            local selection = selected_entry[1]
+
+            vim.fn.systemlist(string.format("git checkout %s", selection))
+          end)
+          return true
+        end,
     }):find()
 end
 
