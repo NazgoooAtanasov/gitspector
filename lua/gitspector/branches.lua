@@ -1,7 +1,7 @@
-local pickers = require "telescope.pickers"
-local finders = require "telescope.finders"
-local conf = require("telescope.config").values
+local pickers = require("telescope.pickers")
+local finders = require("telescope.finders")
 local actions = require("telescope.actions")
+local conf = require("telescope.config").values
 local action_state = require("telescope.actions.state")
 
 local M = {}
@@ -10,10 +10,16 @@ local search_or_create_branch = function (prompt_bufnr, map)
     actions.select_default:replace(function()
         actions.close(prompt_bufnr)
         local selected_entry = action_state.get_selected_entry()
-        local selection = selected_entry[1]
 
-        local git_checkout = string.format("git checkout %s", selection)
-        vim.fn.systemlist(git_checkout)
+        if selected_entry then
+            local selection = selected_entry[1]
+            local git_checkout = string.format("git checkout %s", selection)
+            vim.fn.systemlist(git_checkout)
+        else
+            local selection = action_state.get_current_line()
+            local git_checkout = string.format("git checkout -b %s", selection)
+            vim.fn.systemlist(git_checkout)
+        end
     end)
 
     return true
